@@ -1,10 +1,17 @@
 ## Release notes
 
+### 0.13.6 -- Jun 13, 2022
+* Add - Config option to set threshold for when to stop using checksums for filepath stores. PR #1025
+* Add - Unified package level logger for package (#667) PR #1031
+* Update - Swap various datajoint messages, warnings, etc. to use the new logger. (#667) PR #1031
+* Bugfix - Fix query caching deleting non-datajoint files PR #1027
+* Update - Minimum Python version for Datajoint-Python is now 3.7 PR #1027
+
 ### 0.13.5 -- May 19, 2022
 * Update - Import ABC from collections.abc for Python 3.10 compatibility
 * Bugfix - Fix multiprocessing value error (#1013) PR #1026
 
-### 0.13.4 -- March, 28 2022
+### 0.13.4 -- Mar, 28 2022
 * Add - Allow reading blobs produced by legacy 32-bit compiled mYm library for matlab. PR #995
 * Bugfix - Add missing `jobs` argument for multiprocessing PR #997
 * Add - Test for multiprocessing PR #1008

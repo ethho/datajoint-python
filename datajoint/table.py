@@ -7,7 +7,6 @@ import pandas
 import logging
 import uuid
 import re
-import warnings
 from pathlib import Path
 from .settings import config
 from .declare import declare, alter
@@ -25,7 +24,7 @@ from .errors import (
 )
 from .version import __version__ as version
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__.split(".")[0])
 
 foreign_key_error_regexp = re.compile(
     r"[\w\s:]*\((?P<child>`[^`]+`.`[^`]+`), "
@@ -311,7 +310,7 @@ class Table(QueryExpression):
             raise DataJointError("Update cannot be applied to a restricted table.")
         key = {k: row[k] for k in self.primary_key}
         if len(self & key) != 1:
-            raise DataJointError("Update entry must exist.")
+            raise DataJointError("Update can only be applied to one existing entry.")
         # UPDATE query
         row = [
             self.__make_placeholder(k, v)
@@ -532,7 +531,7 @@ class Table(QueryExpression):
                     cascade(child)
                 else:
                     deleted.add(table.full_table_name)
-                    print(
+                    logger.info(
                         "Deleting {count} rows from {table}".format(
                             count=delete_count, table=table.full_table_name
                         )
@@ -768,7 +767,7 @@ class Table(QueryExpression):
         >>> (v2p.Mice() & key)._update('mouse_dob', '2011-01-01')
         >>> (v2p.Mice() & key)._update( 'lens')   # set the value to NULL
         """
-        warnings.warn(
+        logger.warning(
             "`_update` is a deprecated function to be removed in datajoint 0.14. "
             "Use `.update1` instead."
         )
