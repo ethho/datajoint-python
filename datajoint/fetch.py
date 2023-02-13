@@ -4,6 +4,7 @@ import logging
 import pandas
 import itertools
 import re
+import json
 import numpy as np
 import uuid
 import numbers
@@ -47,6 +48,8 @@ def _get(connection, attr, data, squeeze, download_path):
     """
     if data is None:
         return
+    if attr.json:
+        return json.loads(data)
 
     extern = (
         connection.schemas[attr.database].external[attr.store]
@@ -59,7 +62,6 @@ def _get(connection, attr, data, squeeze, download_path):
 
     if attr.is_filepath:
         return adapt(extern.download_filepath(uuid.UUID(bytes=data))[0])
-
     if attr.is_attachment:
         # Steps:
         # 1. get the attachment filename
@@ -158,7 +160,7 @@ class Fetch:
         unpacks blob attributes.
 
         :param attrs: zero or more attributes to fetch. If not provided, the call will return all attributes of this
-                        relation. If provided, returns tuples with an entry for each attribute.
+                        table. If provided, returns tuples with an entry for each attribute.
         :param offset: the number of tuples to skip in the returned result
         :param limit: the maximum number of tuples to return
         :param order_by: a single attribute or the list of attributes to order the results. No ordering should be assumed
@@ -170,7 +172,7 @@ class Fetch:
                         True for .fetch('KEY')
         :param squeeze:  if True, remove extra dimensions from arrays
         :param download_path: for fetches that download data, e.g. attachments
-        :return: the contents of the relation in the form of a structured numpy.array or a dict list
+        :return: the contents of the table in the form of a structured numpy.array or a dict list
         """
         if order_by is not None:
             # if 'order_by' passed in a string, make into list
@@ -317,7 +319,7 @@ class Fetch1:
                  If attrs is empty, the return result is a dict
         :param squeeze:  When true, remove extra dimensions from arrays in attributes
         :param download_path: for fetches that download data, e.g. attachments
-        :return: the one tuple in the relation in the form of a dict
+        :return: the one tuple in the table in the form of a dict
         """
         heading = self._expression.heading
 

@@ -175,7 +175,7 @@ class TestRelation:
         )
 
     def test_skip_duplicates(self):
-        """test that skip_dublicates works when inserting from another relation"""
+        """test that skip_duplicates works when inserting from another table"""
         self.test_no_extra.delete()
         self.test_no_extra.insert(
             self.test, ignore_extra_fields=True, skip_duplicates=True
@@ -272,18 +272,18 @@ class TestRelation:
         Y = self.img.fetch()[0]["img"]
         assert_true(np.all(X == Y), "Inserted and retrieved image are not identical")
 
-    @raises(dj.DataJointError)
     def test_drop(self):
         """Tests dropping tables"""
         dj.config["safemode"] = True
+        with patch.object(dj.utils, "input", create=True, return_value="yes"):
+            self.trash.drop()
         try:
-            with patch.object(dj.utils, "input", create=True, return_value="yes"):
-                self.trash.drop()
-        except:
+            self.trash.fetch()
+            raise Exception("Fetched after table dropped.")
+        except dj.DataJointError:
             pass
         finally:
             dj.config["safemode"] = False
-        self.trash.fetch()
 
     def test_table_regexp(self):
         """Test whether table names are matched by regular expressions"""
