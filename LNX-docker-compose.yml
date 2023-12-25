@@ -99,5 +99,37 @@ services:
       - .:/src
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       # - ./notebooks:/home/dja/notebooks
+  rabbitmq:
+    <<: *net
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - 15672:15672 # prometheus metrics
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    # volumes:
+    #     - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+    #     - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+  debezium:
+    <<: *net
+    image: quay.io/debezium/server:${DEBEZIUM_VERSION:-2.3}
+    # ports:
+    #   - "8080:8080"
+    volumes:
+      - ./debezium-config:/debezium/conf
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      fakeservices.datajoint.io:
+        condition: service_healthy
+
 networks:
   main:
