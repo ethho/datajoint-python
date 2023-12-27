@@ -117,8 +117,8 @@ services:
   debezium:
     <<: *net
     image: quay.io/debezium/server:${DEBEZIUM_VERSION:-2.3}
-    # ports:
-    #   - "8080:8080"
+    ports:
+      - "8080:8080"
     volumes:
       - ./debezium-config:/debezium/conf
     depends_on:
