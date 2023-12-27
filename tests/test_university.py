@@ -170,11 +170,22 @@ def test_aggr(schema_uni):
 
 
 def test_indefinite(schema_uni):
+    """
+    Continually adds rows to the Department table.
+    """
     from time import sleep
-    breakpoint()
+
+    i = 0
     while True:
-        try:
-            sleep(1)
-        except KeyboardInterrupt as e:
-            # breakpoint()
-            print(e)
+        Department().insert1(
+            dict(
+                dept=f"FOO{i}",
+                dept_name="foobar",
+                dept_address="my address",
+                dept_phone="000000000",
+            ),
+            skip_duplicates=True,
+        )
+        i += 1
+        print(f"Inserting row with ID {i}")
+        sleep(1)
