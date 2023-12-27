@@ -13,8 +13,8 @@ services:
     command: mysqld --default-authentication-plugin=mysql_native_password
     # ports:
     #   - "3306:3306"
-    # volumes:
-    #   - ./mysql/data:/var/lib/mysql
+    volumes:
+      - ./mysql/data:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 30s
@@ -103,6 +103,15 @@ services:
     hostname: rabbitmq-host
     ports:
       - 15672:15672 # prometheus metrics
+    command: >
+      bash -c "
+        sleep 10;
+        rabbitmq-plugins enable rabbitmq_management;
+        rabbitmqadmin declare exchange name=my_stream type=topic;
+        rabbitmqadmin declare exchange name=schema_changes type=topic;
+        rabbitmqadmin declare exchange name=schema_changes.dj_university._letter_grade type=topic;
+        rabbitmq-server
+      "
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -112,8 +121,8 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     # volumes:
-    #     - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-    #     - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    #     - rabbitmq/data/:/var/lib/rabbitmq/
+    #     - rabbitmq/log/:/var/log/rabbitmq
   debezium:
     <<: *net
     image: quay.io/debezium/server:${DEBEZIUM_VERSION:-2.3}
@@ -122,9 +131,11 @@ services:
     volumes:
       - ./debezium-config:/debezium/conf
     depends_on:
-      app:
+      fakeservices.datajoint.io:
         condition: service_started
       rabbitmq:
+        condition: service_healthy
+      db:
         condition: service_healthy
 
 
