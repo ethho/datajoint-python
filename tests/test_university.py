@@ -167,3 +167,13 @@ def test_aggr(schema_uni):
     assert len(set(section.fetch("dept"))) == 1
     assert len(section) == 168
     assert bool(section)
+
+
+def test_indefinite(schema_uni):
+    from time import sleep
+    while True:
+        try:
+            sleep(1)
+        except KeyboardInterrupt as e:
+            # breakpoint()
+            print(e)

@@ -53,10 +53,10 @@ services:
       - ADD_minio_ENDPOINT=minio:9000
       - ADD_minio_PORT=80 # allow unencrypted connections
       - ADD_minio_PREFIX=/datajoint
-    # ports:
-    #   - "80:80"
-    #   - "443:443"
-    #   - "3306:3306"
+    ports:
+      - "3306:3306"
+      # - "80:80"
+      # - "443:443"
   app:
     <<: *net
     image: datajoint/djtest:py${PY_VER:-3.8}-${DISTRO:-alpine}
@@ -87,11 +87,27 @@ services:
       - -c
       - |
         set -e
-        pip install --user nose nose-cov
+        conda install -q -c conda-forge -y mysql-client
         pip install -e .
         pip list --format=freeze | grep datajoint
-        pytest -sv --cov-report term-missing --cov=datajoint tests
-        nosetests -vsw tests_old --with-coverage --cover-package=datajoint
+        pytest tests/test_university.py::test_indefinite
+    healthcheck:
+      test:
+        # Check until a database called djtest_university exists
+        # mysql -u username -p -e "SHOW DATABASES LIKE 'database_name';" | grep "database_name"
+        - "CMD"
+        - "mysql"
+        - "-hdb"
+        - "-uroot"
+        - "-ppassword"
+        - "-e"
+        - "SHOW DATABASES LIKE 'djtest_university';"
+        - "|"
+        - "grep"
+        - "djtest_university"
+      timeout: 30s
+      retries: 10
+      interval: 3s
     # ports:
     #   - "8888:8888"
     user: ${HOST_UID:-1000}:anaconda
@@ -124,11 +140,7 @@ services:
     volumes:
       - ./debezium-config:/debezium/conf
     depends_on:
-      db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      fakeservices.datajoint.io:
+      app:
         condition: service_healthy
 
 networks:
