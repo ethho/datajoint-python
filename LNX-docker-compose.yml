@@ -100,7 +100,7 @@ services:
   rabbitmq:
     <<: *net
     image: rabbitmq:3-management
-    hostname: rabbitmq
+    hostname: rabbitmq-host
     ports:
       - 15672:15672 # prometheus metrics
     healthcheck:
@@ -122,7 +122,11 @@ services:
     volumes:
       - ./debezium-config:/debezium/conf
     depends_on:
-      - app
+      app:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
 
 networks:
   main:
