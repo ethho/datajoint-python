@@ -53,7 +53,7 @@ def schema_uni(db_creds_test, schema_uni_inactive, connection_test, prefix):
         path = test_data_dir / Path(table.__name__ + ".csv")
         assert path.is_file(), f"File {path} is not a file"
         assert path.exists(), f"File {path} does not exist"
-        table().insert(path)
+        table().insert(path, skip_duplicates=True)
     return schema_uni_inactive
 
 
@@ -171,6 +171,7 @@ def test_aggr(schema_uni):
 
 def test_indefinite(schema_uni):
     from time import sleep
+    breakpoint()
     while True:
         try:
             sleep(1)
