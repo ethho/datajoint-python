@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-sleep 5
+sleep 20
 mysql -hfakeservices.datajoint.io -uroot -ppassword -e 'SHOW DATABASES;' | grep 'djtest_university'
 declare -a endpoints=("my_stream" "schema_changes" "schema_changes.djtest_university.department")
 for endpoint in "${endpoints[@]}"; do
