@@ -87,9 +87,9 @@ services:
       - -c
       - |
         set -e
-        pip install -e .
+        pip install -q -e .
         pip list --format=freeze | grep datajoint
-        pytest tests/test_university.py::test_indefinite
+        pytest -sv tests/test_university.py::test_indefinite
     # ports:
     #   - "8888:8888"
     user: ${HOST_UID:-1000}:anaconda
@@ -103,15 +103,6 @@ services:
     hostname: rabbitmq-host
     ports:
       - 15672:15672 # prometheus metrics
-    command: >
-      bash -c "
-        sleep 10;
-        rabbitmq-plugins enable rabbitmq_management;
-        rabbitmqadmin declare exchange name=my_stream type=topic;
-        rabbitmqadmin declare exchange name=schema_changes type=topic;
-        rabbitmqadmin declare exchange name=schema_changes.dj_university._letter_grade type=topic;
-        rabbitmq-server
-      "
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -120,9 +111,6 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-        - ./rabbitmq/data/:/var/lib/rabbitmq/
-        - ./rabbitmq/log/:/var/log/rabbitmq
   pre-deb-setup:
     <<: *net
     build:
@@ -142,7 +130,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./debezium-config:/debezium/conf
+      - ./debezium-demo/debezium:/debezium/conf
     depends_on:
       pre-deb-setup:
         condition: service_completed_successfully
