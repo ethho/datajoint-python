@@ -179,10 +179,10 @@ def test_indefinite(schema_uni):
     while True:
         Department().insert1(
             dict(
-                dept=f"FOO{i}",
+                dept=str(i),
                 dept_name="foobar",
                 dept_address="my address",
-                dept_phone="000000000",
+                dept_phone=str(i),
             ),
             skip_duplicates=True,
         )
