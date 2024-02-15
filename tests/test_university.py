@@ -53,7 +53,7 @@ def schema_uni(db_creds_test, schema_uni_inactive, connection_test, prefix):
         path = test_data_dir / Path(table.__name__ + ".csv")
         assert path.is_file(), f"File {path} is not a file"
         assert path.exists(), f"File {path} does not exist"
-        table().insert(path)
+        table().insert(path, skip_duplicates=True)
     return schema_uni_inactive
 
 
@@ -167,3 +167,25 @@ def test_aggr(schema_uni):
     assert len(set(section.fetch("dept"))) == 1
     assert len(section) == 168
     assert bool(section)
+
+
+def test_indefinite(schema_uni):
+    """
+    Continually adds rows to the Department table.
+    """
+    from time import sleep
+
+    i = 0
+    while True:
+        Department().insert1(
+            dict(
+                dept=str(i),
+                dept_name="foobar",
+                dept_address="my address",
+                dept_phone=str(i),
+            ),
+            skip_duplicates=True,
+        )
+        i += 1
+        print(f"Inserting row with ID {i}")
+        sleep(1)
